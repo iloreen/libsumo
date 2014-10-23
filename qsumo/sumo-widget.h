@@ -54,6 +54,11 @@ public:
 private slots:
 
 	void on__open_close_clicked(bool);
+	void on__flip_clicked(bool);
+	void on__flipDown_clicked(bool);
+	void on__balance_clicked(bool);
+	void on__hijump_clicked(bool);
+	void on__longjump_clicked(bool);
 };
 
 #endif

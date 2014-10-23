@@ -131,3 +131,34 @@ void SumoWidget::on__open_close_clicked(bool)
 		_open_close->setText("Close");
 	}
 }
+
+void SumoWidget::on__flip_clicked(bool)
+{
+	if (sumo)
+		sumo->flipUpsideDown();
+}
+
+void SumoWidget::on__flipDown_clicked(bool)
+{
+	if (sumo)
+		sumo->flipDownsideUp();
+}
+
+void SumoWidget::on__balance_clicked(bool)
+{
+	if (sumo)
+		sumo->handstandBalance();
+}
+
+void SumoWidget::on__hijump_clicked(bool)
+{
+	if (sumo)
+		sumo->highJump();
+}
+
+void SumoWidget::on__longjump_clicked(bool)
+{
+	/*
+	if (sumo)
+		sumo->longJump(); */
+}
