@@ -372,6 +372,7 @@ bool Control::open()
 
 	enableStuff();
 
+	_rt->activateControl(true);
 	//_rt->activateHeartBeatOut(true);
 
 	return true;
@@ -407,7 +408,6 @@ void Control::move(int8_t s, int8_t t)
 	if (_rt) {
 		_rt->setSpeed(s);
 		_rt->setTurn(t);
-		_rt->activateControl(s || t);
 	}
 }
 
