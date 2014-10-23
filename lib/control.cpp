@@ -194,22 +194,34 @@ void Control::dispatch()
 	}
 }
 
-void Control::waitForAck(const struct ioctl_packet &h)
+bool Control::waitForAck(const struct ioctl_packet &h)
 {
 	uint8_t *b = getMessage();
 	if (!b)
-		return;
+		return false;
 
+	bool ret = false;
 	auto *a = reinterpret_cast<struct ack *>(b);
-	if (a->head.type != ACK)
+	if (a->head.type != ACK) {
 		fprintf(stderr, "bad header\n");
+		goto out;
+	}
 
-	if (a->head.seqno != h.head.seqno)
+	if (a->head.seqno != h.head.seqno) {
 		fprintf(stderr, "did not receive acknowledge for my message: %d instead of %d\n", h.head.seqno, a->head.seqno);
+		goto out;
+	}
 
-	if (a->head.ext != (h.head.ext | 0x80))
+	if (a->head.ext != (h.head.ext | 0x80)) {
 		fprintf(stderr, "unexpected ext-flags\n");
+		goto out;
+	}
+
+	ret = true;
+out:
 	delete[] b;
+
+	return ret;
 }
 
 void Control::sendDate()
@@ -220,8 +232,7 @@ void Control::sendDate()
 
 	struct date d(_seqno++);
 	strftime(d.param, sizeof(d.param), "%F", &tm);
-	send(d);
-	waitForAck(d);
+	blockingSend(d);
 }
 
 void Control::sendTime()
@@ -232,32 +243,25 @@ void Control::sendTime()
 
 	struct time p(_seqno++);
 	strftime(p.param, sizeof(p.param), "T%H%M%S%z", &tm);
-	send(p);
-	waitForAck(p);
+	blockingSend(p);
 }
 
 void Control::getInfo()
 {
-	struct ioctl_packet p(_seqno++, sizeof(p), 2, 0, 0);
-	send(p);
-	waitForAck(p);
+	blockingSend(ioctl_packet(_seqno++, sizeof(ioctl_packet), 2, 0, 0));
 }
 
 void Control::enableStuff()
 {
-	struct ioctl_packet p(_seqno++, sizeof(p), 4, 0, 0);
-	send(p);
-	waitForAck(p);
+	blockingSend(ioctl_packet(_seqno++, sizeof(ioctl_packet), 4, 0, 0));
 
 	struct ioctl<uint8_t> i(_seqno++, 18, 0);
 	i.param = 1;
-	send(i);
-	waitForAck(i);
+	blockingSend(i);
 
 	struct ioctl<uint8_t> o(_seqno++, 8, 0);
 	o.param = 1;
-	send(o);
-	waitForAck(o);
+	blockingSend(o);
 }
 
 bool Control::send(const struct packet &b)
@@ -285,18 +289,20 @@ bool Control::send(const struct packet &b)
 	return true;
 }
 
+bool Control::blockingSend(const struct ioctl_packet &b)
+{
+	send(b);
+	return waitForAck(b);
+}
+
 void Control::highJump()
 {
-	struct highjump jump(_seqno++);
-	send(jump);
-	waitForAck(jump);
+	blockingSend(highjump(_seqno++));
 }
 
 void Control::quickTurn(float angle)
 {
-	struct turn turn(_seqno++, angle);
-	send(turn);
-	waitForAck(turn);
+	blockingSend(turn(_seqno++, angle));
 }
 
 

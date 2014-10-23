@@ -50,14 +50,16 @@ class Control : public StoppableThread, public MessageQueue
 	std::thread       _ctrl_in_thread;
 	std::thread       _image_thread;
 
-	uint8_t _seqno;
+	std::atomic<uint8_t> _seqno;
 
 	void dispatch();
-	void waitForAck(const struct ioctl_packet &h);
+	bool waitForAck(const struct ioctl_packet &h);
 	void sendDate();
 	void sendTime();
 	void getInfo();
 	void enableStuff();
+
+	bool blockingSend(const struct ioctl_packet &b);
 
 public:
 	Control() : _udp(-1), _send_lock(), _rt(0), _rt_thread_in(), _rt_thread_out(), _image_thread(), _seqno(0)
