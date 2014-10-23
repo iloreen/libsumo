@@ -1,0 +1,133 @@
+What is this?
+-------------
+
+This projet is a collection of code showing how to control Parrot's
+Jumping Sumo. The maker, Parrot, freely provides an App (Freeflight 3)
+for Android and iOS for people to use it with smartphone and
+tablets. Parrot promissed a SDK "this year" (2014) to programmatically
+control the Sumo from any platform. However, I was not willing to wait.
+
+The Jumping Sumo is a WiFi-controlled kind of two-tyred RC-Car equipped
+with a camera for live-streaming (and recording). It does do jumps and
+special, preprogrammed moves.
+
+There are two design goals and reasons for this project (and these apply
+as well for the to-be-released SDK): one is to used the code to create
+user-applications on platforms which are not officially supported by Parrot.
+And, secondly, have people automate the control of the Sumo by
+programmatically processing the video-frames and thus have the Sumo
+orientate itself.
+
+The code which can be found in this repository was completely reverse
+engineered. This was done completely independently of Parrot. They
+neither provided help nor did I ask for help in any way.  In other
+words it works, but has a lot of limitations and assumptations in it
+and, in the worst case, might harm or even damage the device when
+being used with. So:
+
+THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY
+APPLICABLE LAW. YOU ARE USING THIS CODE AT YOUR OWN RISK.
+
+The principal of reverse engineering is, that you send data-bytes to
+the device you have captured using the official applipcation. Once
+analyzed and processed you are able to associate those bytes with a
+certain functionality.
+
+What's in the package
+---------------------
+
+analyze/
+
+  code which is used to analyze captured network packages
+
+lib/
+
+  a C++11 library providing a simple class (sumo::Control) to control
+  the Sumo. It encapsulates the network-protocol and handles all in and
+  outgoing network traffic
+
+qsumo/
+
+  a simple QT-app letting you control the Sumo with arrow keys on your
+  keyboard
+
+test/
+
+  a super simple and small command-line application which does nothing
+  else than having the Sumo turn circles and thus showing how to use the API.
+
+Get it working (on Linux)
+-------------------------
+
+1) get the code
+2) create a build-dir
+3) in build-dir run
+   cmake <path-to-source>
+   make
+4) connect yourself to the WiFi provided by the Sumo
+5) run qs (the QtApp)
+6) click "Open" (it should change the caption to Close when successful
+   and you should see some text being printed in the terminal)
+7) click on a empty section of the QtApp window
+8) Use the arrow keys to accelerate or break and to turn left or right.
+
+Requirements
+------------
+
+- a C++11 capable compiler (gcc >=4.8, clang (not tested))
+- if you want to analyze network code with 'analyze' libpcap-dev
+- if you want to build the qt-app, libqt4-dev
+- mplayer
+
+What is implemented
+-------------------
+
+- Moving (acceleration and turning)
+- Videoframes are shown
+- Battery-level can be read
+- HighJump
+- FastTurns
+
+What's missing (a.k.a TODO)
+---------------------------
+
+- sometimes images are not more sent when no action is performed (only every 500ms)
+- add missing special effects codes (longjump, slalom, tap, rotate, swing, fast-turn)
+- understand usage of timestamps in "realtime part"
+- understand all incoming Type-4 Messages (IOCTL)
+- implement correct JSON parsing and generation
+- handle configuration messages (don't even know which protocol is used
+- change class which handles video frames so that it can be easily overriden for automatic image processing
+
+
+License
+-------
+
+LGPL v2.1 - see COPYING-file
+
+Links
+-----
+
+Parrot - Company
+  http://www.parrot.com/
+
+Parrot - Jumping Sumo product page
+  http://www.parrot.com/usa/products/jumping-sumo/
+
+Qt Forum - Get keypress events
+  http://qt-project.org/forums/viewthread/28888
+
+
+Contribution
+------------
+
+I'd like to see
+- feedback,
+- you trying it out and reporting what happens,
+- you forking this repo on github
+- you sending patches with fixes, improvements, changes or ports to other languages.
+
+Have fun.
+
+--
+Ive Loreen <ive.loreen@gmail.com>
