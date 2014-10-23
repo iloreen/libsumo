@@ -43,17 +43,17 @@ target_link_libraries(test_sumo sumo)
 
 # qsumo
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+#set(CMAKE_AUTOUIC ON) # works only with cmake >= 3.0
+
 find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
 include(${QT_USE_FILE})
 
 set(qsumo_SRCS qsumo/qsumo.cpp qsumo/sumo-widget.cpp)
 
-#QT4_WRAP_UI(qsumo_UIS_H ${qsumo_UIS})
-#QT4_ADD_RESOURCES(qsumo_RCC_SRCS qsumo.qrc)
+QT4_WRAP_UI(ui_widget.h qsumo/widget.ui)
 
-add_executable(qs ${qsumo_SRCS} ${qsumo_UIS_H} ${qsumo_RCC_SRCS})
+add_executable(qs ${qsumo_SRCS} ui_widget.h)
 
 target_link_libraries(qs
 	${QT_LIBRARIES}
