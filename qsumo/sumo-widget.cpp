@@ -86,10 +86,11 @@ void SumoWidget::timerEvent(QTimerEvent *)
 #define TURN_CONSTANT 5
 	mod = 0;
 	if (!keys[Qt::Key_Left] && !keys[Qt::Key_Right]) {
-		mod = -turn/TURN_CONSTANT;
+		mod = -turn/TURN_CONSTANT * 3;
+
 
 		if (abs(turn) < TURN_CONSTANT && turn)
-			mod = 1 * (turn < 0 ? 1 : -1);
+			mod = -turn; //TURN_CONSTANT * (turn < 0 ? 1 : -1);
 	}
 
 	if (keys[Qt::Key_Left])
