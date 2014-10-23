@@ -45,26 +45,30 @@ void RealTime::heartBeatIn()
 
 void RealTime::heartBeatOut()
 {
+	bool waiting_for_response = false;
 	uint8_t seqno = 1;
 	while (!_stop) {
-		if (_sendHeartBeatOut) {
-			struct timespec tp;
-			if (clock_gettime(CLOCK_MONOTONIC, &tp) != 0) {
-				msleep(10);
-				continue;
-			}
-
-			struct sync sync(seqno++, (uint32_t) tp.tv_sec, (uint32_t) tp.tv_nsec);
-
-			if (!_dp->send(sync)) {
-				msleep(100);
-				continue;
-			}
-		}
 
 		if (_sendHeartBeatOut) {
-			uint8_t *b = _out.getMessage(20);
-			delete[] b;
+			if (waiting_for_response) {
+				uint8_t *b = _out.getMessage(5);
+				if (b != 0)
+					waiting_for_response = false;
+				delete[] b;
+			} else {
+				struct timespec tp;
+				if (clock_gettime(CLOCK_MONOTONIC, &tp) != 0) {
+					msleep(10);
+					continue;
+				}
+
+				struct sync sync(seqno++, (uint32_t) tp.tv_sec, (uint32_t) tp.tv_nsec);
+				if (!_dp->send(sync)) {
+					msleep(100);
+					continue;
+				}
+				waiting_for_response = true;
+			}
 		}
 
 		if (_sendControl) {
