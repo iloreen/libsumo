@@ -143,6 +143,14 @@ struct highjump : public ioctl<uint32_t>
 	}
 };
 
+struct flip : public ioctl<uint32_t>
+{
+	flip(uint8_t seq) : ioctl(seq, 0, 1, 0x03)
+	{
+		param = 1;
+	}
+};
+
 struct image : public packet
 {
 	uint16_t frame_number;
