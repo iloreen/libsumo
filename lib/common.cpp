@@ -83,7 +83,7 @@ static const char * strTime()
 
 static void printTime()
 {
-	dump(strTime());
+	dump("%s", strTime());
 }
 
 void dumpPayload(const uint8_t *packet, uint32_t l, bool floats)
