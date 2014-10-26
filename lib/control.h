@@ -70,6 +70,7 @@ public:
 
 	void move(int8_t, int8_t);
 	void highJump();
+	void longJump();
 
 	void quickTurn(float angle);
 	void flipUpsideDown();

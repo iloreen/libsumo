@@ -297,7 +297,12 @@ bool Control::blockingSend(const struct ioctl_packet &b)
 
 void Control::highJump()
 {
-	blockingSend(highjump(_seqno++));
+	blockingSend(jump(_seqno++, jump::High));
+}
+
+void Control::longJump()
+{
+	blockingSend(jump(_seqno++, jump::Long));
 }
 
 void Control::quickTurn(float angle)

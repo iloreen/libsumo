@@ -135,11 +135,18 @@ struct turn : public ioctl<float>
 	}
 } __attribute__((packed));
 
-struct highjump : public ioctl<uint32_t>
+struct jump : public ioctl<uint32_t>
 {
-	highjump(uint8_t seq) : ioctl(seq, 2, 3, 0x03)
+	enum type {
+		Long,
+		High,
+	};
+	jump(uint8_t seq, enum type type) : ioctl(seq, 2, 3, 0x03)
 	{
-		param = 1;
+		if (type == Long)
+			param = 0;
+		else if (type == High)
+			param = 1;
 	}
 };
 
