@@ -69,6 +69,7 @@ public:
 	void close();
 
 	void move(int8_t, int8_t);
+
 	void highJump();
 	void longJump();
 
@@ -76,6 +77,16 @@ public:
 	void flipUpsideDown();
 	void flipDownsideUp();
 	void handstandBalance();
+
+	void quickTurnRight();
+	void lookLeftAndRight();
+	void tap();
+	void swing();
+	void quickTurnRightLeft();
+	void turnAndJump();
+	void turnToBalance();
+	void slalom();
+	void growingCircles();
 
 	int batteryLevel();
 

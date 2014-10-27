@@ -325,6 +325,51 @@ void Control::flipDownsideUp()
 	blockingSend(flip(_seqno++, 2));
 }
 
+void Control::swing()
+{
+	blockingSend(special(_seqno++, special::Swing));
+}
+
+void Control::turnAndJump()
+{
+	blockingSend(special(_seqno++, special::TurnAndJump));
+}
+
+void Control::quickTurnRight()
+{
+	blockingSend(special(_seqno++, special::QuickTurnRight));
+}
+
+void Control::lookLeftAndRight()
+{
+	blockingSend(special(_seqno++, special::LookLeftAndRight));
+}
+
+void Control::tap()
+{
+	blockingSend(special(_seqno++, special::Tap));
+}
+
+void Control::quickTurnRightLeft()
+{
+	blockingSend(special(_seqno++, special::QuickTurnRightLeft));
+}
+
+void Control::turnToBalance()
+{
+	blockingSend(special(_seqno++, special::TurnToBalance));
+}
+
+void Control::slalom()
+{
+	blockingSend(special(_seqno++, special::Slalom));
+}
+
+void Control::growingCircles()
+{
+	blockingSend(special(_seqno++, special::GrowingCircles));
+}
+
 bool Control::open()
 {
 	int sockfd;

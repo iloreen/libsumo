@@ -159,7 +159,59 @@ void SumoWidget::on__hijump_clicked(bool)
 
 void SumoWidget::on__longjump_clicked(bool)
 {
-	/*
 	if (sumo)
-		sumo->longJump(); */
+		sumo->longJump();
+}
+
+void SumoWidget::on__swing_clicked(bool)
+{
+	if (sumo)
+		sumo->swing();
+}
+
+void SumoWidget::on__growingCircles_clicked(bool)
+{
+	if (sumo)
+		sumo->growingCircles();
+}
+
+void SumoWidget::on__slalom_clicked(bool)
+{
+	if (sumo)
+		sumo->slalom();
+}
+
+void SumoWidget::on__tap_clicked(bool)
+{
+	if (sumo)
+		sumo->tap();
+}
+
+void SumoWidget::on__turn_clicked(bool)
+{
+	if (sumo)
+		sumo->quickTurnRight();
+}
+
+void SumoWidget::on__turnLeftRight_clicked(bool)
+{
+	if (sumo)
+		sumo->quickTurnRightLeft();
+}
+
+void SumoWidget::on__turnToBalance_clicked(bool)
+{	if (sumo)
+		sumo->turnToBalance();
+}
+
+void SumoWidget::on__watchLeftRight_clicked(bool)
+{
+	if (sumo)
+		sumo->lookLeftAndRight();
+}
+
+void SumoWidget::on__turnAndJump_clicked(bool)
+{
+	if (sumo)
+		sumo->turnAndJump();
 }

@@ -59,6 +59,16 @@ private slots:
 	void on__balance_clicked(bool);
 	void on__hijump_clicked(bool);
 	void on__longjump_clicked(bool);
+
+	void on__growingCircles_clicked(bool);
+	void on__slalom_clicked(bool);
+	void on__swing_clicked(bool);
+	void on__tap_clicked(bool);
+	void on__turn_clicked(bool);
+	void on__turnAndJump_clicked(bool);
+	void on__turnLeftRight_clicked(bool);
+	void on__turnToBalance_clicked(bool);
+	void on__watchLeftRight_clicked(bool);
 };
 
 #endif
