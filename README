@@ -60,24 +60,36 @@ Get it working (on Linux)
 -------------------------
 
 1) get the code
+   $ git clone https://github.com/iloreen/libsumo.git
+
 2) create a build-dir
-3) in build-dir run
-   cmake <path-to-source>
-   make
+   $ cd libsumo
+   $ mkdir build
+
+3) in build-dir run cmake and compile the stuff
+   $ cd build
+   $ cmake ..
+   $ make
+
 4) connect yourself to the WiFi provided by the Sumo
+
 5) run qs (the QtApp)
+   $ ./qs
+
 6) click "Open" (it should change the caption to Close when successful
-   and you should see some text being printed in the terminal)
-7) click on a empty section of the QtApp window
-8) Use the arrow keys to accelerate or break and to turn left or right.
+   and you should see some text being printed in the terminal and you
+   should see a video-player (mplayer) window open with the current
+   view of the sumo)
+
+7) Use the arrow keys to accelerate or break and to turn left or right.
 
 Requirements
 ------------
 
-- a C++11 capable compiler (gcc >=4.8, clang (not tested))
-- if you want to analyze network code with 'analyze' libpcap-dev
+- a C++11 capable compiler (gcc >=4.8, clang)
+- if you want to analyze network code with 'analyze' you need libpcap-dev
 - if you want to build the qt-app, libqt4-dev
-- mplayer
+- mplayer, used by the QtApp to display the video images
 
 What is implemented
 -------------------
@@ -85,19 +97,19 @@ What is implemented
 - Moving (acceleration and turning)
 - Videoframes are shown
 - Battery-level can be read
-- HighJump
+- HighJump and LongJump
 - FastTurns
+- special moves (like Slalom, fast-turns)
 
 What's missing (a.k.a TODO)
 ---------------------------
 
-- sometimes images are not more sent when no action is performed (only every 500ms)
-- add missing special effects codes (longjump, slalom, tap, rotate, swing, fast-turn)
 - understand usage of timestamps in "realtime part"
 - understand all incoming Type-4 Messages (IOCTL)
 - implement correct JSON parsing and generation
-- handle configuration messages (don't even know which protocol is used
+- handle configuration messages (don't even know which protocol is used)
 - change class which handles video frames so that it can be easily overriden for automatic image processing
+- implement MDNS discovery - right now the Sumo's IP address is hardcoded to 192.168.2.1
 
 
 License
