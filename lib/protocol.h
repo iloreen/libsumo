@@ -150,6 +150,64 @@ struct jump : public ioctl<uint32_t>
 	}
 };
 
+struct special : public ioctl<uint32_t>
+{
+	enum type
+	{
+		QuickTurnRight,
+		LookLeftAndRight,
+		Tap,
+		Swing,
+		QuickTurnRightLeft,
+		TurnAndJump,
+		TurnToBalance,
+		Slalom,
+		GrowingCircles,
+	};
+
+	special(uint8_t seq, enum type type) : ioctl(seq, 2, 4, 0x03)
+	{
+		/* tried 1 - does nothing */
+		switch (type) {
+		case QuickTurnRight:
+			param = 1;
+			break;
+
+		case Tap:
+			param = 2;
+			break;
+
+		case LookLeftAndRight:
+			param = 3;
+			break;
+
+		case QuickTurnRightLeft:
+			param = 4;
+			break;
+
+		case Swing:
+			param = 5;
+			break;
+
+		case TurnAndJump:
+			param = 6;
+			break;
+
+		case TurnToBalance:
+			param = 7;
+			break;
+
+		case GrowingCircles:
+			param = 8;
+			break;
+
+		case Slalom:
+			param = 9;
+			break;
+		}
+	}
+};
+
 struct flip : public ioctl<uint32_t>
 {
 	flip(uint8_t seq, uint8_t upside_down) : ioctl(seq, 0, 1, 0x03)

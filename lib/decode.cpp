@@ -198,7 +198,7 @@ void udpOut(const uint8_t *b, uint32_t len)
 			printf("ioctl: flags: %02x, type: %d, func: %d; unk: %d, prefix: %d\t", a->flags, a->type, a->func, a->unk, prefix);
 			switch (a->type) {
 			case 0:
-				printf("unhandled rotate X?\n");
+				printf("unhandled rotate X %d?\n", *(uint32_t *) (b + sizeof(ioctl_packet)));
 				break;
 			case 2:
 				switch (a->func) {
@@ -211,7 +211,7 @@ void udpOut(const uint8_t *b, uint32_t len)
 				} break;
 				case 4: {
 					auto *j = reinterpret_cast<const struct ioctl<uint32_t> *>(b);
-					printf("????: %x\n", j->param);
+					printf("action: %x\n", j->param);
 				} break;
 				default:
 					printf("4/ %d no additional data: %lu?\n", a->func, head->size - sizeof(*a));
