@@ -56,6 +56,8 @@ test/
   a super simple and small command-line application which does nothing
   else than having the Sumo turn circles and thus showing how to use the API.
 
+See README.dev for me information on the API.
+
 Get it working (on Linux)
 -------------------------
 

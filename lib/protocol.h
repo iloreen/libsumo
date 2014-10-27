@@ -34,22 +34,26 @@ namespace sumo
 
 struct header
 {
-	uint8_t type;
-	uint8_t ext;
-	uint8_t seqno;
-	uint16_t size;
-	uint16_t unk;
+	uint8_t type;  /* the main protocol type/category: ACK, SYNC, IMAGE, IOCTL */
+	uint8_t ext;   /* extension of this type*/
+	uint8_t seqno; /* sequence number for this type */
+	uint16_t size; /* packet-size including header */
+	uint16_t unk;  /* unknown 16bit always 0 in the analyzed data */
 } __attribute__((packed));
 
+/* packet base - has a header */
 struct packet
 {
 	struct header head;
 
 	packet(uint8_t t, uint8_t e, uint8_t s, uint16_t size) : head( { t, e, s, size, 0 } )
 	{ }
-
 } __attribute__((packed));
 
+/* synchronoziation timestamp since device has booted in nanoseconds
+ * bi-directional and acknoledged from the other side
+ * acknowledge is done with setting head.ext = 1
+ */
 struct sync : public packet
 {
 	uint32_t seconds;
@@ -59,7 +63,6 @@ struct sync : public packet
 		packet(SYNC, 0, seq, sizeof(*this)),
 		seconds(sec), nanoseconds(nsec)
 	{ }
-
 } __attribute__((packed));
 
 struct move : public packet
@@ -73,7 +76,6 @@ struct move : public packet
 		packet(SYNC, 10, seq, sizeof(*this)),
 		b{0x03,0,0,0}, active(a), speed(s), turn(t)
 	{ }
-
 } __attribute__((packed));
 
 struct ack : public packet
@@ -218,10 +220,10 @@ struct flip : public ioctl<uint32_t>
 
 struct image : public packet
 {
-	uint16_t frame_number;
-	uint16_t unk0;
-	uint8_t unk1;
-	/* image data JPEG */
+    uint16_t frame_number; /* absolute frame-name */
+	uint16_t unk0;         /* unknown */
+	uint8_t unk1;          /* unknown */
+	/* uint8_t jpeg[head.size - sizeof(head) - 5)] */ /* image data JPEG */
 } __attribute__((packed));
 
 }

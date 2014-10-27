@@ -1,0 +1,92 @@
+Protocol
+--------
+
+MDNS - discovery
+----------------
+
+My understanding so far: the protocol to control the Jumping Sumo is
+mainly based on UDP-messages. In the beginning there is a small
+configuration exchange using TCP (and JSON). This connection is might
+also be also used for configuring the Sumo
+
+The Freeflight 3 app makes the device join a multicast group and does
+a MDNS discover to find the Sumo IP address and entry service: It
+looks for who is providing the '_arsdk-0902' on a '._udp.local'-domain .
+
+Sometimes it gets a response, sometimes not. This "sometimes" is, I think, the
+root-problem of the FreeFlight3 App of sometimes not finding the Sumo.
+
+The response contains the three DNS-types of information: 'TXT',
+'SRV', 'A'.  TXT gives us the complete IP-name of the device:
+'JumpingSumo-<serial-no>._arsdk-0902._udp.local'. 'SRV' tells us
+that there is a service "JumpingSumo-<serial-no>" at Port 44444,
+targetting "JumpingSumo-<serial-no>.local" . 'A' provides us with
+IP-Address for "JumpingSumo-<serial-no>.local"
+
+/* here does the current implementation of libsumo start */
+
+TCP connection to 44444
+-----------------------
+
+With this information we establish a TCP-connection to
+"JumpingSumo-<serial-no>.local" on port 44444 doing exactly on
+exchange:
+
+We send JSON-formatted string:
+
+{ "controller_name" : "<device name>", "controller_type": "<control name>", "d2c_port": 54321 }
+
+Here the important part is the 'd2c_port'-field which tells the device (Sumo)
+to which UDP-port of the controller (PC or SmartPhone) it has to
+send the network-packets.
+
+The device answers with a JSON-formatted string:
+
+{ "status": 0, "c2d_port": 54321, "arstream_fragment_size": 65000, "arstream_fragment_maximum_number": 4,
+  "c2d_update_port": 51, "c2d_user_port": 21 }
+
+Basically we see here the 'c2d_port' which tells us where to send our
+outgoing UDP-packets. The other fields are yet to be exploited.
+Touching user_port or update_port seems undarable if you do not want
+to break the device.
+
+Once this is done the TCP-connection is closed and from now on only
+UDP-packets are sent.
+
+I assume that the configuration of the Sumo is done using this
+connection but haven't checked it yet.
+
+UDP-packets
+-----------
+
+For details about the packet structures see lib/protocol.h. Some of
+the logic can only be found in the lib/*.cpp files using these structures.
+
+In the packet-structures some of the fields are called 'unk' or
+'unknown'. This indicates that I wasn't able to figure out their
+usage.
+
+There are 4 main packet-types: SYNC, ACK, IOCTL and IMAGE (my names).
+
+SYNC is bi-directional and we see timestamps getting in, being
+confirmed from the controller and vice-versa. Additionally the
+controller send the move and turn-command using this type of packet.
+
+IMAGE is an incoming-only packet and carries the latest camera image
+of the Sumo in JPEG-format.
+
+IOCTL is used to signal several control commands, including basic
+information gathering of the device, enabling of video-streaming,
+special moves and jumps and so on. It is again bi-directional and the
+device is sending for example the battery-level using this
+packet-type.
+
+ACK is used to acknowledge the IOCTL command. Done by the device and
+by the controller. If the ACK-packet is not send within 100ms the
+device will send it again up to 3 times.
+
+
+LibSumo
+-------
+
+
