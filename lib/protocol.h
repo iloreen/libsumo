@@ -51,13 +51,13 @@ struct packet
 } __attribute__((packed));
 
 /* synchronoziation timestamp since device has booted in nanoseconds
- * bi-directional and acknoledged from the other side
- * acknowledge is done with setting head.ext = 1
+ * bi-directional and acknowledged from the other side acknowledge is
+ * done with setting head.ext = 1
+ *
+ * Seems to be send by the device at least before another transaction
+ * is done, otherwise with a delay of 500msecs
  */
-struct sync : public packet
-{
-	uint32_t seconds;
-	uint32_t nanoseconds;
+struct sync : public packet { uint32_t seconds; uint32_t nanoseconds;
 
 	sync(uint8_t seq, uint32_t sec, uint32_t nsec) :
 		packet(SYNC, 0, seq, sizeof(*this)),
@@ -65,12 +65,13 @@ struct sync : public packet
 	{ }
 } __attribute__((packed));
 
+/* a packet of type sync used to move forward or backward and to turn the sumo */
 struct move : public packet
 {
 	uint8_t b[4];
-	uint8_t active;
-	int8_t  speed;
-	int8_t  turn;
+	uint8_t active; /* if speed or turn is non-zero, this field goes to one */
+	int8_t  speed; /* -127 - 127 */
+	int8_t  turn;  /* -64 - 64 */
 
 	move(uint8_t seq, uint8_t a, int8_t s, int8_t t) :
 		packet(SYNC, 10, seq, sizeof(*this)),
@@ -78,9 +79,10 @@ struct move : public packet
 	{ }
 } __attribute__((packed));
 
+/* acknowledge an ioctl packet */
 struct ack : public packet
 {
-	uint8_t seqno;
+	uint8_t seqno; /* ioctl seqno to be acknowledged */
 
 	ack(uint8_t ext, uint8_t seq, uint8_t confirm) :
 		packet(ACK, ext, seq, sizeof(*this)),
@@ -88,23 +90,23 @@ struct ack : public packet
 	{}
 } __attribute__((packed));
 
-
+/* base class of an ioctl-packet, containing the common fields */
 struct ioctl_packet : public packet
 {
-	uint8_t flags;
-	uint8_t type;
-	uint8_t func;
-	uint8_t unk;
+	uint8_t flags; /* I used flags to name this field as I saw bitfields being used for some exchanges */
+	uint8_t type;  /* type and func are used to indicate what to tell or instruct with this packet and indicate which data-payload is send */
+	uint8_t func;  /* func or index */
+	uint8_t unk;   /* unknown */
 
 	ioctl_packet(uint8_t seq, uint16_t size, uint8_t t, uint8_t fu, uint8_t flags = 0) :
-		packet(IOCTL, 11, seq, size),
-		flags(flags), type(t), func(fu), unk(0)
+		packet(IOCTL, 11, seq, size),  /* ext is always set to 11 for outgoing packets */
+		flags(flags), type(t), func(fu), unk(0) /* unknown always set to 0 */
 	{}
 
 } __attribute__((packed));
 
 template<typename T>
-struct ioctl : public ioctl_packet
+struct ioctl : public ioctl_packet /* template to create customized ioctl-payload packets */
 {
 	T param;
 
@@ -121,6 +123,7 @@ struct date : public ioctl<char[11]>
 	{ }
 } __attribute__((packed));
 
+/* used to set the current timestamp */
 struct time : public ioctl<char[13]>
 {
 	time(uint8_t seq) :
@@ -128,6 +131,7 @@ struct time : public ioctl<char[13]>
 	{ }
 } __attribute__((packed));
 
+/* quick to turn in param = [ -PI,  PI ]; */
 struct turn : public ioctl<float>
 {
 	turn(uint8_t seq, float an) :
@@ -137,6 +141,7 @@ struct turn : public ioctl<float>
 	}
 } __attribute__((packed));
 
+/* instruct a jump - uses a uint32 for signaling the kind of jump */
 struct jump : public ioctl<uint32_t>
 {
 	enum type {
@@ -217,6 +222,7 @@ struct flip : public ioctl<uint32_t>
 		UpsideDown,
 		DownsideUp,
 	};
+
 	flip(uint8_t seq, enum type type) : ioctl(seq, 0, 1, 0x03)
 	{
 		switch (type) {
