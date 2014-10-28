@@ -312,17 +312,17 @@ void Control::quickTurn(float angle)
 
 void Control::handstandBalance()
 {
-	blockingSend(flip(_seqno++, 0));
+	blockingSend(flip(_seqno++, flip::Balance));
 }
 
 void Control::flipUpsideDown()
 {
-	blockingSend(flip(_seqno++, 1));
+	blockingSend(flip(_seqno++, flip::UpsideDown));
 }
 
 void Control::flipDownsideUp()
 {
-	blockingSend(flip(_seqno++, 2));
+	blockingSend(flip(_seqno++, flip::DownsideUp));
 }
 
 void Control::swing()

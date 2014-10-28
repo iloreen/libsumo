@@ -212,9 +212,24 @@ struct special : public ioctl<uint32_t>
 
 struct flip : public ioctl<uint32_t>
 {
-	flip(uint8_t seq, uint8_t upside_down) : ioctl(seq, 0, 1, 0x03)
+	enum type {
+		Balance,
+		UpsideDown,
+		DownsideUp,
+	};
+	flip(uint8_t seq, enum type type) : ioctl(seq, 0, 1, 0x03)
 	{
-		param = upside_down;
+		switch (type) {
+		case Balance:
+			param = 0;
+			break;
+		case UpsideDown:
+			param = 1;
+			break;
+		case DownsideUp:
+			param = 2;
+			break;
+		}
 	}
 };
 
