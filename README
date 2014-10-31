@@ -56,10 +56,13 @@ test/
   a super simple and small command-line application which does nothing
   else than having the Sumo turn circles and thus showing how to use the API.
 
-See README.dev for me information on the API.
+See README.dev for me information on the code.
 
 Get it working (on Linux)
 -------------------------
+
+0) get the dependencies (Ubuntu/Debian)
+   $ sudo apt-get install libpcap-dev libqt4-dev mplayer
 
 1) get the code
    $ git clone https://github.com/iloreen/libsumo.git

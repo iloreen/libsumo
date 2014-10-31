@@ -1,35 +1,35 @@
 Protocol
 --------
 
-MDNS - discovery
-----------------
-
 My understanding so far: the protocol to control the Jumping Sumo is
 mainly based on UDP-messages. In the beginning there is a small
 configuration exchange using TCP (and JSON). This connection is might
-also be also used for configuring the Sumo
+also be also used for configuring the Sumo.
 
-The Freeflight 3 app makes the device join a multicast group and does
-a MDNS discover to find the Sumo IP address and entry service: It
-looks for who is providing the '_arsdk-0902' on a '._udp.local'-domain .
+DNS-SD/MDNS - discovery
+-----------------------
 
-Sometimes it gets a response, sometimes not. This "sometimes" is, I think, the
-root-problem of the FreeFlight3 App of sometimes not finding the Sumo.
+The very first thing. The Freeflight 3 app makes the device join a
+multicast group and does a MDNS discover to find the Sumo IP address
+and entry service: It looks for who is providing the '_arsdk-0902' on
+a '._udp.local'-domain .
+
+Sometimes it gets a response, sometimes not. This "sometimes" is, I
+think, the root-problem of the FreeFlight3 App of sometimes not
+finding the Sumo on some Phones/Tablets.
 
 The response contains the three DNS-types of information: 'TXT',
 'SRV', 'A'.  TXT gives us the complete IP-name of the device:
 'JumpingSumo-<serial-no>._arsdk-0902._udp.local'. 'SRV' tells us
-that there is a service "JumpingSumo-<serial-no>" at Port 44444,
+that there is a service "JumpingSumo-<serial-no>" at port 44444,
 targetting "JumpingSumo-<serial-no>.local" . 'A' provides us with
 IP-Address for "JumpingSumo-<serial-no>.local"
-
-/* here does the current implementation of libsumo start */
 
 TCP connection to 44444
 -----------------------
 
-With this information we establish a TCP-connection to
-"JumpingSumo-<serial-no>.local" on port 44444 doing exactly on
+With this information the controller establishes a TCP-connection to
+"JumpingSumo-<serial-no>.local" on port 44444 doing exactly one
 exchange:
 
 We send JSON-formatted string:
@@ -53,40 +53,109 @@ to break the device.
 Once this is done the TCP-connection is closed and from now on only
 UDP-packets are sent.
 
-I assume that the configuration of the Sumo is done using this
-connection but haven't checked it yet.
-
 UDP-packets
 -----------
 
 For details about the packet structures see lib/protocol.h. Some of
-the logic can only be found in the lib/*.cpp files using these structures.
+the logic can only be found in the lib/*.cpp files which are using
+these structures.
 
 In the packet-structures some of the fields are called 'unk' or
 'unknown'. This indicates that I wasn't able to figure out their
-usage.
+usage. Basically they have been constant in all analyzed communication.
 
-There are 4 main packet-types: SYNC, ACK, IOCTL and IMAGE (my names).
+I names the 4 main packet-types: SYNC, ACK, IOCTL and IMAGE.
 
 SYNC is bi-directional and we see timestamps getting in, being
 confirmed from the controller and vice-versa. Additionally the
-controller send the move and turn-command using this type of packet.
+controller senda the move and turn-command using this type of packet
+in regular manner.
 
 IMAGE is an incoming-only packet and carries the latest camera image
-of the Sumo in JPEG-format.
+of the Sumo in JPEG-format and a total frame_number-index.
+Images are received in a VGA resolution, so what looks like a video is
+in fact a sequence of JPEGs. At first I was stunned as to why to do it
+like this considering the bandwidth used. But think of the possibility
+of lost UDP-packets: you cannot work with any advanced video-codec as
+losing one frame can kill the stream for several seconds. Whereas
+losing one JPEG might even go unnoticed by the user.
+
+The frame-rate is about 15 fps.
 
 IOCTL is used to signal several control commands, including basic
-information gathering of the device, enabling of video-streaming,
+information gathered from the device, enabling of video-streaming,
 special moves and jumps and so on. It is again bi-directional and the
 device is sending for example the battery-level using this
 packet-type.
 
-ACK is used to acknowledge the IOCTL command. Done by the device and
-by the controller. If the ACK-packet is not send within 100ms the
-device will send it again up to 3 times.
-
+ACK is used to acknowledge the IOCTL command sequence number. Done by
+the device and by the controller. If the ACK-packet is not send within
+100ms the device will send it again up to 3 times.
 
 LibSumo
 -------
 
+The code which can be found in lib/ is the implemention of a library
+intended to be run on the controller-side.
 
+It is written in C++11 and uses some of the new feature introduced in
+C++, like threads and mutexes.
+
+The following block-diagram descibes the structure and the role of
+each thread in detail:
+
+
+
+Everything the user needs to create is an object of the class
+Control. Calling the method open() will establish a connection to
+the Sumo and initialize it until it is ready to be used. close() will
+release the connection.
+
+Calling open() will also create a bunch of threads inside the
+controller object. Each thread has a distinctive role regarding the
+communication with the Sumo:
+
+There is the Dispatcher In-, Control In-, ReatTime In- and Out- and the
+Image-thread, and of course the main or user-thread (Controller Out).
+
+The threads are communicating with each other using message-queues.
+
+The Control OUT-thread is the one sending IOCTL-messages to the
+device expressing action which have been requested by an user action.
+
+The Dispatcher IN-thread reads data from the UDP-inbound
+connection. After parsing the message-header it will dispatch the
+message into the message-queue for the appropriate thread.
+
+These two threads are implemented in the Control-class.
+
+Control IN is implemented next to the Control-class in a private class
+manner. It handles all incoming IOCTL-messages such as battery-level
+or other information send by the Sumo (SerialNumber) and provides them
+via the API to the user. It signals as well certain states regarding
+incoming IOCTL-message so that the protocol-logic is kept synchronous.
+
+The RealTime IN and OUT thread are handling the in- and outgoing
+nanosecond-based heartbeat timestamp send every "now and then" by the
+controller and the device. In addition the outgoing traffic of this
+type is used to send move and turn instructions. I haven't yet figured
+out the real reason for the precise heartbeat action. I have seen
+videos provided by Parrot where one can observe multiple Sumos doing
+synchronized actions. Maybe it is used for that.
+
+One thread is dedicated to the image-reception.
+
+API
+---
+
+Have a look into control.h. The public methods are the action I was
+able to figure out. I even found actions which where, at the time of
+writing this, not available in FreeFlight3.
+
+Debug and decode
+----------------
+
+In the library there is also a collection of tool I used during
+reverse-engineering. Especially the decode.cpp-tools can be used to
+analyze a network stream and also to debug what you are actually
+sending.

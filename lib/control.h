@@ -29,7 +29,6 @@
 namespace sumo {
 
 struct packet;
-struct ioctrl_packet;
 
 class RealTime;
 class Image;
