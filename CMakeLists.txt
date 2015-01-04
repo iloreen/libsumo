@@ -30,6 +30,11 @@ add_library(sumo
 )
 target_link_libraries(sumo ${CMAKE_THREAD_LIBS_INIT})
 
+if(UNIX AND NOT APPLE)
+	find_library(RT rt)
+    target_link_libraries(sumo ${RT})
+endif()
+
 # build analyzer only if PCAP was found
 find_package(Pcap)
 if(PCAP_FOUND)
@@ -39,7 +44,6 @@ endif()
 
 add_executable(test_sumo test/test.cpp)
 target_link_libraries(test_sumo sumo)
-
 
 # qsumo
 set(CMAKE_AUTOMOC ON)
