@@ -28,20 +28,37 @@ namespace sumo
 
 void Image::process()
 {
-	FILE *p = popen("mplayer -cache 32 -demuxer lavf -lavfdopts format=mjpeg - >/dev/null 2>&1", "w");
 	while (!_stop) {
 		uint8_t *b = getMessage();
 		if (!b)
 			break;
 		auto *i = reinterpret_cast<struct image *>(b);
 
+		handleImage(i, b + sizeof(*i), i->head.size - sizeof(*i));
+
 		//printf("size: %d, fno: %d\n", i->head.size, i->frame_number);
-		if (p)
-			fwrite(b + sizeof(*i), 1, i->head.size - sizeof(*i), p);
 
 		delete[] b;
 	}
-	pclose(p);
+}
+
+ImageMplayerPopen::ImageMplayerPopen() : _p(0)
+{
+	_p = popen("mplayer -cache 32 -demuxer lavf -lavfdopts format=mjpeg - >/dev/null 2>&1", "w");
+	if (!_p)
+		fprintf(stderr, "could not start mplayer process via popen() - images will be dropped\n");
+}
+
+ImageMplayerPopen::~ImageMplayerPopen()
+{
+	if (_p)
+		pclose(_p);
+}
+
+void ImageMplayerPopen::handleImage(const struct image *, const uint8_t *buffer, size_t size)
+{
+	if (_p)
+		fwrite(buffer, 1, size, _p);
 }
 
 }

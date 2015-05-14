@@ -20,10 +20,20 @@
  * 02110-1301 USA
  */
 #include <control.h>
+#include <image.h>
+
+class ImageProcessing : public sumo::Image
+{
+public:
+	void handleImage(const struct sumo::image *, const uint8_t *buffer, size_t size)
+	{
+		fprintf(stderr, "received image of %zu bytes at %p\n", size, buffer);
+	}
+};
 
 int main(void)
 {
-	sumo::Control c;
+	sumo::Control c(new ImageProcessing);
 
 	if (!c.open())
 		return EXIT_FAILURE;

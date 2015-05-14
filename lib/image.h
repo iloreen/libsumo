@@ -31,8 +31,23 @@ class Image : public MessageQueue, public StoppableThread
 public:
 	Image() : MessageQueue(), StoppableThread()
 	{ }
+	virtual ~Image() { }
 
 	void process();
+
+	virtual void handleImage(const struct image *image, const uint8_t *buffer, size_t size) = 0;
+};
+
+class ImageMplayerPopen : public Image
+{
+	FILE *_p;
+
+public:
+	ImageMplayerPopen();
+	~ImageMplayerPopen();
+
+	void handleImage(const struct image *image, const uint8_t *buffer, size_t size);
+
 };
 
 }

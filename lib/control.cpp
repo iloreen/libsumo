@@ -172,7 +172,8 @@ void Control::dispatch()
 				break;
 
 			case IMAGE:
-				_image->sendMessage(p, hdr->size);
+				if (_image)
+					_image->sendMessage(p, hdr->size);
 				break;
 
 			case ACK:
@@ -370,6 +371,13 @@ void Control::growingCircles()
 	blockingSend(special(_seqno++, special::GrowingCircles));
 }
 
+
+Control::~Control()
+{
+	delete _image;
+}
+
+
 bool Control::open()
 {
 	int sockfd;
@@ -418,9 +426,13 @@ bool Control::open()
 	_rt_thread_out = std::thread(&RealTime::heartBeatIn, _rt);
 	_rt_thread_in = std::thread(&RealTime::heartBeatOut, _rt);
 
-	_image = new Image();
-	_image->reset();
-	_image_thread = std::thread(&Image::process, _image);
+	if (_image) {
+		_image->reset();
+		_image_thread = std::thread(&Image::process, _image);
+	} else {
+		fprintf(stderr, "WARNING: no image display or processing object present. Images will be dropped\n");
+
+	}
 
 	_ctrl_in = new ControlIn(this);
 	_ctrl_in->reset();
@@ -468,9 +480,10 @@ void Control::close()
 	_rt_thread_in.join();
 	delete _rt; _rt = 0;
 
-	_image->stop(); _image->sendMessage(0, 0);
-	_image_thread.join();
-	delete _image; _image = 0;
+	if (_image) {
+		_image->stop(); _image->sendMessage(0, 0);
+		_image_thread.join();
+	}
 }
 
 void Control::move(int8_t s, int8_t t)

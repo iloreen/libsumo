@@ -61,8 +61,9 @@ class Control : public StoppableThread, public MessageQueue
 	bool blockingSend(const struct ioctl_packet &b);
 
 public:
-	Control() : _udp(-1), _send_lock(), _rt(0), _rt_thread_in(), _rt_thread_out(), _image_thread(), _seqno(0)
+	Control(Image *image) : _udp(-1), _send_lock(), _rt(0), _image(image), _rt_thread_in(), _rt_thread_out(), _image_thread(), _seqno(0)
 	{ }
+	~Control();
 
 	bool open();
 	void close();

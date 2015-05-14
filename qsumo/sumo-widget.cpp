@@ -25,6 +25,7 @@
 #include <QSlider>
 
 #include <control.h>
+#include <image.h>
 
 SumoWidget::SumoWidget() : accel(0), turn(0), sumo(0)
 {
@@ -121,7 +122,7 @@ void SumoWidget::on__open_close_clicked(bool)
 		delete sumo; sumo = 0;
 		_open_close->setText("Open");
 	} else {
-		sumo = new sumo::Control;
+		sumo = new sumo::Control(new sumo::ImageMplayerPopen());
 		if (!sumo->open()) {
 			delete sumo;
 			sumo = 0;
